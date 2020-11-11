@@ -36,13 +36,20 @@ class RandomWordsState extends State<RandomWords> {
     return new Scaffold(
       appBar: new AppBar(
         title: new Text('Startup Name Generator'),
+        //这里是在appBar添加一个列表图标。点击时调用pushSaved方法来跳转到新的页面。
+        actions: <Widget>[
+          new IconButton(icon: new Icon(Icons.list), onPressed: pushSaved),
+        ],
       ),
       body: _buildSuggestion(),
     );
   }
 
   Widget _buildSuggestion() {
-    //这个方法用于生成ListView，里面存放单词对
+    //这个builder是一个构造器，用于生成ListView。
+    //适合用于有很多很多列的列表，只有可以被看见的列会调用这个方法
+    //也就是一列一列的生成，注意里面的itemBuilder
+    //里面存放单词对
     return new ListView.builder(
         padding: const EdgeInsets.all(16.0), //这个是设置内边距！！
         itemBuilder: (context, i) {
@@ -85,5 +92,41 @@ class RandomWordsState extends State<RandomWords> {
             }
           });
         });
+  }
+
+//当用户点击导航栏中的列表图标时，建立一个路由并将其推入到导航管理器栈中。
+  void pushSaved() {
+    Navigator.of(context).push(
+      //路由入栈？
+      //新页面的内容在MaterialPageRoute的builder属性中构建，builder是一个匿名函数
+      new MaterialPageRoute(
+        builder: (context) {
+          final tiles = _saved.map(
+            (word) {
+              //给用户收藏的单词创建列表
+              return new ListTile(
+                title: new Text(
+                  word,
+                  style: _biggerFont,
+                ),
+              );
+            },
+          );
+          final divided = ListTile.divideTiles(
+            //这个方法在每个ListTile之间增加1像素的分割线。（为什么之前那个页面不用？）
+            context: context,
+            tiles: tiles,
+          ).toList();
+          //方法返回一个Iterable，用toList()方法把它变成List。divided持有最终的列表项
+
+          return new Scaffold(
+            appBar: new AppBar(
+              title: new Text('Saved Suggestions'),
+            ),
+            body: new ListView(children: divided),
+          );
+        },
+      ),
+    );
   }
 }
