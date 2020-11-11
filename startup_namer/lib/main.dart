@@ -28,6 +28,8 @@ class RandomWordsState extends State<RandomWords> {
   final _suggestions = <WordPair>[]; //一个单词对的数组：建议列表，用于存储生成的单词对
   final _biggerFont = const TextStyle(fontSize: 18.0); //这个变量用于设置字体大小
 
+  final _saved = new Set<String>(); //存储用户收藏的单词对
+
   //在这个状态的build中构建Scaffold，body调用_buildSuggestion方法。
   @override
   Widget build(BuildContext context) {
@@ -57,18 +59,31 @@ class RandomWordsState extends State<RandomWords> {
             _suggestions.addAll(generateWordPairs().take(10));
           }
           //如果是非奇数行：生成单词对的widget
-          print(index);
+          //print(index);
           return _buildRow(_suggestions[index].asPascalCase); //这个方法用于生成有单词对的一行。
         });
   }
 
 //这个方法得到一个单词对，生成一个包含它的ListTile widget返回。
   Widget _buildRow(String word) {
+    final alreadySaved = _saved.contains(word); //标记这个单词是否已经被收藏
     return new ListTile(
-      title: new Text(
-        word,
-        style: _biggerFont,
-      ),
-    );
+        title: new Text(
+          word,
+          style: _biggerFont,
+        ),
+        //trailing是列表的每一行末尾
+        trailing: new Icon(
+            alreadySaved ? Icons.favorite : Icons.favorite_border,
+            color: alreadySaved ? Colors.red : null),
+        onTap: () {
+          setState(() {
+            if (alreadySaved) {
+              _saved.remove(word);
+            } else {
+              _saved.add(word);
+            }
+          });
+        });
   }
 }
