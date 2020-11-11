@@ -85,6 +85,7 @@ class RandomWordsState extends State<RandomWords> {
             color: alreadySaved ? Colors.red : null),
         onTap: () {
           setState(() {
+            //这个方法调用的时候会调用build方法重新渲染widget更新视图（改变心心）
             if (alreadySaved) {
               _saved.remove(word);
             } else {
@@ -99,32 +100,41 @@ class RandomWordsState extends State<RandomWords> {
     Navigator.of(context).push(
       //路由入栈？
       //新页面的内容在MaterialPageRoute的builder属性中构建，builder是一个匿名函数
-      new MaterialPageRoute(
+      MaterialPageRoute<void>(
         builder: (context) {
-          final tiles = _saved.map(
-            (word) {
-              //给用户收藏的单词创建列表
-              return new ListTile(
-                title: new Text(
-                  word,
-                  style: _biggerFont,
-                ),
-              );
-            },
-          );
-          final divided = ListTile.divideTiles(
-            //这个方法在每个ListTile之间增加1像素的分割线。（为什么之前那个页面不用？）
-            context: context,
-            tiles: tiles,
-          ).toList();
-          //方法返回一个Iterable，用toList()方法把它变成List。divided持有最终的列表项
+          return StatefulBuilder(
+              builder: (BuildContext context, StateSetter setState) {
+            final tiles = _saved.map(
+              (word) {
+                //给用户收藏的单词创建列表
+                return new ListTile(
+                    title: new Text(
+                      word,
+                      style: _biggerFont,
+                    ),
+                    trailing: new Icon(Icons.delete),
+                    onTap: () {
+                      setState(() {
+                        _saved.remove(word);
+                      });
+                      this.setState(() {});
+                    });
+              },
+            );
+            final divided = ListTile.divideTiles(
+              //这个方法在每个ListTile之间增加1像素的分割线。（为什么之前那个页面不用？）
+              context: context,
+              tiles: tiles,
+            ).toList();
+            //方法返回一个Iterable，用toList()方法把它变成List。divided持有最终的列表项
 
-          return new Scaffold(
-            appBar: new AppBar(
-              title: new Text('Saved Suggestions'),
-            ),
-            body: new ListView(children: divided),
-          );
+            return new Scaffold(
+              appBar: new AppBar(
+                title: new Text('Saved Suggestions'),
+              ),
+              body: new ListView(children: divided),
+            );
+          });
         },
       ),
     );
